@@ -21,7 +21,7 @@ export default defineHandler(async (event) => {
   }
 
   try {
-    const environment = getServerEnvironment(request);
+    const environment = getServerEnvironment(request, event.context);
     const body = await readJsonBody(request);
     if (!environment.APP_SESSION_SECRET || !environment.APP_ACCESS_PASSWORD) {
       return jsonResponse(503, { error: 'Server access credentials are not configured.' });
@@ -37,7 +37,7 @@ export default defineHandler(async (event) => {
     return jsonResponse(
       isInvalidBody ? 400 : 500,
       { error: isInvalidBody ? error.message : 'Gagal memverifikasi akses.' },
-      { 'Set-Cookie': clearSessionCookie(getServerEnvironment(request)) },
+      { 'Set-Cookie': clearSessionCookie(getServerEnvironment(request, event.context)) },
     );
   }
 });

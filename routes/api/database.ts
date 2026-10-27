@@ -18,14 +18,26 @@ const allowedCollections = new Set([
 
 export default defineHandler(async (event) => {
   const request = event.req;
-  const environment = getServerEnvironment(request);
-  const scriptUrl = environment.GOOGLE_APPS_SCRIPT_URL;
-  if (!scriptUrl || !isValidScriptUrl(scriptUrl)) {
-    return jsonResponse(503, { error: 'Google Apps Script URL is not configured.' });
+  const environment = getServerEnvironment(request, event.context);
+  const configuredScriptUrl = environment.GOOGLE_APPS_SCRIPT_URL?.trim();
+  if (!configuredScriptUrl) {
+    return jsonResponse(503, {
+      error: 'GOOGLE_APPS_SCRIPT_URL tidak tersedia pada runtime Worker ini.',
+      diagnostic: {
+        urlPresent: false,
+        tokenPresent: Boolean(environment.GOOGLE_APPS_SCRIPT_TOKEN),
+      },
+    });
+  }
+  if (!isValidScriptUrl(configuredScriptUrl)) {
+    return jsonResponse(503, {
+      error: 'GOOGLE_APPS_SCRIPT_URL tersedia, tetapi format URL-nya tidak valid.',
+      diagnostic: { urlPresent: true, urlValid: false },
+    });
   }
 
   if (request.method === 'GET') {
-    return proxyRead(scriptUrl);
+    return proxyRead(configuredScriptUrl);
   }
   if (request.method !== 'POST') {
     return jsonResponse(405, { error: 'Method not allowed.' }, { Allow: 'GET, POST' });
@@ -37,7 +49,7 @@ export default defineHandler(async (event) => {
     return jsonResponse(401, { error: 'Silakan masukkan password sebelum menyimpan perubahan.' });
   }
 
-  const apiToken = environment.GOOGLE_APPS_SCRIPT_TOKEN;
+  const apiToken = environment.GOOGLE_APPS_SCRIPT_TOKEN?.trim();
   if (!apiToken) {
     return jsonResponse(503, { error: 'Google Apps Script token is not configured.' });
   }
@@ -52,7 +64,7 @@ export default defineHandler(async (event) => {
       payload: JSON.stringify(body),
       apiToken,
     });
-    const upstream = await fetch(scriptUrl, {
+    const upstream = await fetch(configuredScriptUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
       body: payload,

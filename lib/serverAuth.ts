@@ -5,11 +5,21 @@ const SESSION_DURATION_SECONDS = 60 * 60 * 8;
 
 export type ServerEnvironment = Record<string, string | undefined>;
 
-export function getServerEnvironment(request: Request): ServerEnvironment {
+export function getServerEnvironment(
+  request: Request,
+  context?: unknown,
+): ServerEnvironment {
   const runtimeRequest = request as Request & {
     runtime?: { cloudflare?: { env?: Record<string, unknown> } };
   };
-  const bindings = runtimeRequest.runtime?.cloudflare?.env;
+  const eventContext = context as {
+    cloudflare?: { env?: Record<string, unknown> };
+    env?: Record<string, unknown>;
+  } | undefined;
+  const bindings =
+    runtimeRequest.runtime?.cloudflare?.env ??
+    eventContext?.cloudflare?.env ??
+    eventContext?.env;
   const environment: ServerEnvironment = { ...process.env };
 
   if (bindings) {
