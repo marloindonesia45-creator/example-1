@@ -3,6 +3,24 @@ import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 const SESSION_COOKIE = 'together_access';
 const SESSION_DURATION_SECONDS = 60 * 60 * 8;
 
+export type ServerEnvironment = Record<string, string | undefined>;
+
+export function getServerEnvironment(request: Request): ServerEnvironment {
+  const runtimeRequest = request as Request & {
+    runtime?: { cloudflare?: { env?: Record<string, unknown> } };
+  };
+  const bindings = runtimeRequest.runtime?.cloudflare?.env;
+  const environment: ServerEnvironment = { ...process.env };
+
+  if (bindings) {
+    for (const [key, value] of Object.entries(bindings)) {
+      if (typeof value === 'string') environment[key] = value;
+    }
+  }
+
+  return environment;
+}
+
 export function jsonResponse(
   statusCode: number,
   data: Record<string, unknown>,
@@ -41,8 +59,8 @@ export function isSameOrigin(request: Request): boolean {
   }
 }
 
-export function passwordMatches(candidate: unknown): boolean {
-  const expected = process.env.APP_ACCESS_PASSWORD;
+export function passwordMatches(candidate: unknown, environment: ServerEnvironment): boolean {
+  const expected = environment.APP_ACCESS_PASSWORD;
   if (!expected || typeof candidate !== 'string') return false;
 
   const candidateBuffer = Buffer.from(candidate);
@@ -51,9 +69,9 @@ export function passwordMatches(candidate: unknown): boolean {
     timingSafeEqual(candidateBuffer, expectedBuffer);
 }
 
-export function hasValidSession(request: Request): boolean {
+export function hasValidSession(request: Request, environment: ServerEnvironment): boolean {
   const token = getCookie(request, SESSION_COOKIE);
-  const secret = process.env.APP_SESSION_SECRET;
+  const secret = environment.APP_SESSION_SECRET;
   if (!token || !secret) return false;
 
   const separator = token.lastIndexOf('.');
@@ -72,19 +90,19 @@ export function hasValidSession(request: Request): boolean {
   return Number.isFinite(expiresAt) && expiresAt > Date.now();
 }
 
-export function createSessionCookie(): string {
-  const secret = process.env.APP_SESSION_SECRET;
+export function createSessionCookie(environment: ServerEnvironment): string {
+  const secret = environment.APP_SESSION_SECRET;
   if (!secret) throw new Error('APP_SESSION_SECRET is not configured.');
 
   const expiresAt = Date.now() + SESSION_DURATION_SECONDS * 1000;
   const payload = `${expiresAt}.${randomBytes(16).toString('hex')}`;
   const token = `${payload}.${sign(payload, secret)}`;
-  const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
+  const secure = environment.NODE_ENV === 'production' ? '; Secure' : '';
   return `${SESSION_COOKIE}=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${SESSION_DURATION_SECONDS}${secure}`;
 }
 
-export function clearSessionCookie(): string {
-  const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
+export function clearSessionCookie(environment: ServerEnvironment): string {
+  const secure = environment.NODE_ENV === 'production' ? '; Secure' : '';
   return `${SESSION_COOKIE}=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0${secure}`;
 }
 

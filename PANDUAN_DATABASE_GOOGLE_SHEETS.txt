@@ -237,37 +237,65 @@ Penulisan hanya diterima jika token rahasia dari server cocok dengan Script
 Properties; jangan menaruh token tersebut di frontend.
 
 
-BAGIAN 3 - KONFIGURASI VERCEL DAN PASSWORD AMAN
+BAGIAN 3 - KONFIGURASI DEPLOY DAN PASSWORD AMAN
 ------------------------------------------------
 
-Password diverifikasi di server Vercel. Jangan gunakan awalan VITE_ untuk URL
-database, password, atau token rahasia; nilai VITE_ masuk ke bundle browser.
+Password dan token digunakan di server, bukan di browser. Jangan gunakan
+awalan VITE_ untuk URL database, password, atau token rahasia; nilai VITE_
+masuk ke bundle browser.
 
-1. Di Vercel buka Project > Settings > Environment Variables.
-2. Tambahkan variabel berikut untuk Production (tambahkan Preview/Development
-   jika environment tersebut dipakai):
+CLOUDFLARE WORKERS BUILDS
+-------------------------
 
-   GOOGLE_APPS_SCRIPT_URL
+Project ini sudah menetapkan Nitro preset Cloudflare di vite.config.ts.
+Pengaturan build Cloudflare:
+
+- Build command: npm run build
+- Deploy command: npx wrangler deploy
+- Preview command: npx wrangler preview (boleh gunakan nilai default)
+- Root directory: folder utama project yang berisi package.json dan vite.config.ts
+- Preview builds: opsional
+- Protect with Cloudflare Access: nonaktifkan jika website harus dapat dibuka publik
+
+Rahasia adalah runtime variables, bukan build variables. Di Cloudflare buka
+Worker > Settings > Variables and Secrets, lalu tambahkan:
+
+1. GOOGLE_APPS_SCRIPT_URL
    Nilai: URL Web App Apps Script yang berakhiran /exec.
-
-   GOOGLE_APPS_SCRIPT_TOKEN
+2. GOOGLE_APPS_SCRIPT_TOKEN
    Nilai: token acak panjang yang Anda buat sendiri.
-
-   APP_ACCESS_PASSWORD
+3. APP_ACCESS_PASSWORD
    Nilai: password untuk fitur tambah kenangan dan pengaturan.
-
-   APP_SESSION_SECRET
+4. APP_SESSION_SECRET
    Nilai: secret acak panjang yang berbeda dari password dan token.
 
-3. Di Apps Script buka Project Settings > Script Properties > Add script
-   property:
+Pilih jenis Secret untuk password/token. Tambahkan binding environment dan
+deploy ulang setelah menyimpan. Nitro membaca binding dari request runtime
+Cloudflare; rahasia tidak perlu ditambahkan ke Build Variables.
+
+Di Cloudflare Worker > Settings > Compatibility pastikan flag nodejs_compat
+aktif. Build Nitro seharusnya menghasilkan flag ini otomatis.
+
+VERCEL (JIKA DIPAKAI)
+---------------------
+
+Di Vercel buka Project > Settings > Environment Variables. Tambahkan variabel
+server-only berikut untuk environment yang digunakan:
+
+   GOOGLE_APPS_SCRIPT_URL
+   GOOGLE_APPS_SCRIPT_TOKEN
+   APP_ACCESS_PASSWORD
+   APP_SESSION_SECRET
+
+Di Apps Script buka Project Settings > Script Properties > Add script
+property:
    Property: SERVER_API_TOKEN
-   Value: harus sama persis dengan GOOGLE_APPS_SCRIPT_TOKEN di Vercel.
-4. Simpan perubahan Apps Script. Jika kode berubah, deploy versi baru lewat
-   Deploy > Manage deployments > Edit > New version > Deploy.
-5. Hapus variabel lama VITE_GOOGLE_APPS_SCRIPT_URL dan
-   VITE_FEATURE_ACCESS_PASSWORD dari Vercel jika sebelumnya pernah dibuat.
-6. Setelah mengubah environment variables Vercel, lakukan redeploy.
+   Value: harus sama persis dengan GOOGLE_APPS_SCRIPT_TOKEN pada runtime server.
+Simpan perubahan Apps Script. Jika kode berubah, deploy versi baru lewat
+Deploy > Manage deployments > Edit > New version > Deploy.
+Hapus variabel lama VITE_GOOGLE_APPS_SCRIPT_URL dan
+VITE_FEATURE_ACCESS_PASSWORD dari platform hosting jika sebelumnya dibuat.
+Setelah mengubah secrets/environment variables, lakukan redeploy.
 
 Browser hanya berkomunikasi dengan endpoint same-origin /api/access dan
 /api/database. Password diperiksa oleh function server; cookie sesi bertanda
@@ -278,14 +306,10 @@ penulisan langsung tanpa token server akan ditolak.
 
 API dibuat sebagai Nitro routes di routes/api/, dipindai dengan serverDir "./",
 dan plugin Nitro terpasang di vite.config.ts. Jalankan npm run dev untuk
-frontend dan API sekaligus. Untuk
-tes konfigurasi environment production, isi variabel yang sama di .env.local
-(tanpa prefix VITE_) dan gunakan vercel dev atau npm run dev.
-
-Di Vercel, pastikan Root Directory mengarah ke folder utama project ini yang
-memiliki package.json, vite.config.ts, dan routes/api/. Build Vite+Nitro
-mengemas frontend dan API agar endpoint /api/database serta /api/access
-dijalankan sebagai server, bukan mengirim source route ke browser.
+frontend dan API sekaligus. Untuk tes preview Cloudflare, gunakan Wrangler dan
+file .dev.vars yang diabaikan Git. Pastikan Root Directory hosting mengarah ke
+folder utama project ini. Build Nitro mengemas frontend dan API agar endpoint
+/api/database serta /api/access dijalankan sebagai server.
 
 Aplikasi ini sudah disiapkan untuk menghubungkan URL tersebut. Saat pertama
 kali, masukkan password fitur; jika database Sheets belum diinisialisasi,
@@ -310,14 +334,14 @@ PENGUJIAN
    deployments > Edit > New version > Deploy.
 
 Jika data tidak masuk, periksa:
-- GOOGLE_APPS_SCRIPT_URL di Vercel benar dan berakhiran /exec.
-- GOOGLE_APPS_SCRIPT_TOKEN di Vercel sama persis dengan SERVER_API_TOKEN
+- GOOGLE_APPS_SCRIPT_URL pada runtime environment benar dan berakhiran /exec.
+- GOOGLE_APPS_SCRIPT_TOKEN sama persis dengan SERVER_API_TOKEN
   pada Script Properties Apps Script.
 - APP_ACCESS_PASSWORD dan APP_SESSION_SECRET disimpan sebagai variabel
   server-only, tanpa awalan VITE_.
 - Web App sudah di-deploy dengan akses "Anyone".
 - Akun pemilik deployment sudah memberikan izin Spreadsheet.
-- Environment variables Vercel sudah disimpan dan project sudah redeploy.
+- Runtime variables/secrets sudah disimpan dan project sudah redeploy.
 - Console browser dan Executions di Apps Script untuk melihat error.
 
 Cadangkan spreadsheet secara berkala. Perubahan data yang bersamaan pada

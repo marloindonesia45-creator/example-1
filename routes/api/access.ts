@@ -4,6 +4,7 @@ import {
 import {
   clearSessionCookie,
   createSessionCookie,
+  getServerEnvironment,
   isSameOrigin,
   jsonResponse,
   passwordMatches,
@@ -20,22 +21,23 @@ export default defineHandler(async (event) => {
   }
 
   try {
+    const environment = getServerEnvironment(request);
     const body = await readJsonBody(request);
-    if (!process.env.APP_SESSION_SECRET || !process.env.APP_ACCESS_PASSWORD) {
+    if (!environment.APP_SESSION_SECRET || !environment.APP_ACCESS_PASSWORD) {
       return jsonResponse(503, { error: 'Server access credentials are not configured.' });
     }
-    if (!passwordMatches(body.password)) {
+    if (!passwordMatches(body.password, environment)) {
       return jsonResponse(401, { error: 'Password salah. Coba lagi.' });
     }
 
-    return jsonResponse(200, { ok: true }, { 'Set-Cookie': createSessionCookie() });
+    return jsonResponse(200, { ok: true }, { 'Set-Cookie': createSessionCookie(environment) });
   } catch (error) {
     console.error('Access authentication failed:', error);
     const isInvalidBody = error instanceof Error && error.message.includes('Request body');
     return jsonResponse(
       isInvalidBody ? 400 : 500,
       { error: isInvalidBody ? error.message : 'Gagal memverifikasi akses.' },
-      { 'Set-Cookie': clearSessionCookie() },
+      { 'Set-Cookie': clearSessionCookie(getServerEnvironment(request)) },
     );
   }
 });

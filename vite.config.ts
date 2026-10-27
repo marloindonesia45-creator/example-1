@@ -6,7 +6,11 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
-    plugins: [nitro({ serverDir: './' }), react(), tailwindcss()],
+    plugins: [
+      nitro({ serverDir: './', preset: 'cloudflare_module' }),
+      react(),
+      tailwindcss(),
+    ],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),

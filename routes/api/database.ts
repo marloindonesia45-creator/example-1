@@ -3,6 +3,7 @@ import {
 } from 'nitro/h3';
 import {
   hasValidSession,
+  getServerEnvironment,
   isSameOrigin,
   jsonResponse,
   readJsonBody,
@@ -17,7 +18,8 @@ const allowedCollections = new Set([
 
 export default defineHandler(async (event) => {
   const request = event.req;
-  const scriptUrl = process.env.GOOGLE_APPS_SCRIPT_URL;
+  const environment = getServerEnvironment(request);
+  const scriptUrl = environment.GOOGLE_APPS_SCRIPT_URL;
   if (!scriptUrl || !isValidScriptUrl(scriptUrl)) {
     return jsonResponse(503, { error: 'Google Apps Script URL is not configured.' });
   }
@@ -31,11 +33,11 @@ export default defineHandler(async (event) => {
   if (!isSameOrigin(request)) {
     return jsonResponse(403, { error: 'Request origin is not allowed.' });
   }
-  if (!hasValidSession(request)) {
+  if (!hasValidSession(request, environment)) {
     return jsonResponse(401, { error: 'Silakan masukkan password sebelum menyimpan perubahan.' });
   }
 
-  const apiToken = process.env.GOOGLE_APPS_SCRIPT_TOKEN;
+  const apiToken = environment.GOOGLE_APPS_SCRIPT_TOKEN;
   if (!apiToken) {
     return jsonResponse(503, { error: 'Google Apps Script token is not configured.' });
   }
