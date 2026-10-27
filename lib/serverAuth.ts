@@ -16,10 +16,14 @@ export function getServerEnvironment(
     cloudflare?: { env?: Record<string, unknown> };
     env?: Record<string, unknown>;
   } | undefined;
+  const workerEnvironment = (globalThis as typeof globalThis & {
+    __env__?: Record<string, unknown>;
+  }).__env__;
   const bindings =
     runtimeRequest.runtime?.cloudflare?.env ??
     eventContext?.cloudflare?.env ??
-    eventContext?.env;
+    eventContext?.env ??
+    workerEnvironment;
   const environment: ServerEnvironment = { ...process.env };
 
   if (bindings) {
