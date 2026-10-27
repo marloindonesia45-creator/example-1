@@ -1,0 +1,326 @@
+PANDUAN DATABASE APLIKASI KE GOOGLE SHEETS
+=========================================
+
+File ini berisi kode backend Google Apps Script dan langkah menghubungkannya
+ke aplikasi. Setelah langkah konfigurasi selesai, data galeri, riwayat foto,
+pengaturan gambar halaman, dan pengaturan musik disimpan di Google Sheets.
+Aplikasi tidak menggunakan localStorage; Google Sheets menjadi penyimpanan
+data utama.
+
+CATATAN PENTING
+---------------
+- Kolom gambar menyimpan URL/link gambar, bukan file gambar itu sendiri.
+  Link Google Drive harus dapat diakses oleh pengunjung aplikasi.
+- Web App dengan akses "Anyone" dapat dibaca dan ditulis oleh siapa pun yang
+  mengetahui URL deployment. Jangan gunakan untuk data rahasia atau sensitif.
+- Gunakan spreadsheet khusus untuk aplikasi ini. Jangan simpan data pribadi
+  penting di dalamnya.
+- Perubahan dari browser lain dimuat ketika halaman dibuka ulang; belum ada
+  sinkronisasi langsung (real-time).
+- Jika Apps Script gagal diakses, aplikasi menampilkan pemberitahuan dan tidak
+  menyimpan perubahan ke database sampai halaman berhasil dimuat ulang.
+
+
+BAGIAN 1 - MEMBUAT SPREADSHEET DAN APPS SCRIPT
+----------------------------------------------
+
+1. Buat Google Spreadsheet baru.
+2. Salin ID spreadsheet dari URL:
+   https://docs.google.com/spreadsheets/d/ID_SPREADSHEET/edit
+3. Di spreadsheet, buka Extensions > Apps Script.
+4. Hapus isi Code.gs, lalu tempel seluruh kode di bawah.
+5. Ganti SPREADSHEET_ID dengan ID spreadsheet milik Anda. Jangan biarkan nilai
+   contoh GANTI_DENGAN_ID_SPREADSHEET.
+6. Tekan Save.
+
+KODE APPS SCRIPT (Code.gs)
+--------------------------
+
+const SPREADSHEET_ID = 'GANTI_DENGAN_ID_SPREADSHEET';
+
+const COLLECTION_SHEETS = {
+  galleryItems: 'Gallery',
+  historyEntries: 'History',
+  siteImages: 'SiteImages',
+  musicConfig: 'MusicConfig',
+};
+
+function doGet(e) {
+  try {
+    const snapshot = readDatabase_();
+    const callback = e && e.parameter ? e.parameter.callback : '';
+
+    if (callback) {
+      if (!/^[A-Za-z_$][0-9A-Za-z_$]*$/.test(callback)) {
+        throw new Error('Nama callback tidak valid.');
+      }
+
+      return ContentService
+        .createTextOutput(callback + '(' + JSON.stringify(snapshot) + ');')
+        .setMimeType(ContentService.MimeType.JAVASCRIPT);
+    }
+
+    return ContentService
+      .createTextOutput(JSON.stringify(snapshot))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (error) {
+    const callback = e && e.parameter ? e.parameter.callback : '';
+    const message = error.message || String(error);
+    if (callback && /^[A-Za-z_$][0-9A-Za-z_$]*$/.test(callback)) {
+      return ContentService
+        .createTextOutput(callback + '(' + JSON.stringify({ error: message }) + ');')
+        .setMimeType(ContentService.MimeType.JAVASCRIPT);
+    }
+
+    return ContentService
+      .createTextOutput(JSON.stringify({ error: message }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function doPost(e) {
+  try {
+    const expectedToken = PropertiesService.getScriptProperties()
+      .getProperty('SERVER_API_TOKEN');
+    const providedToken = e && e.parameter ? e.parameter.apiToken : '';
+    if (!expectedToken || !providedToken || providedToken !== expectedToken) {
+      throw new Error('Permintaan penyimpanan tidak diotorisasi.');
+    }
+
+    const rawPayload = e && e.parameter ? e.parameter.payload : '';
+    if (!rawPayload) throw new Error('Payload tidak ditemukan.');
+
+    const request = JSON.parse(rawPayload);
+
+    if (request.action !== 'saveAll' && request.action !== 'saveCollection') {
+      throw new Error('Aksi tidak dikenal.');
+    }
+
+    const lock = LockService.getScriptLock();
+    if (!lock.tryLock(20000)) {
+      throw new Error('Database sedang sibuk. Silakan coba lagi.');
+    }
+
+    try {
+      if (request.action === 'saveAll') {
+        const data = request.data || {};
+        Object.keys(COLLECTION_SHEETS).forEach(function (collection) {
+          writeCollection_(collection, data[collection]);
+        });
+        PropertiesService.getScriptProperties()
+          .setProperty('DATABASE_INITIALIZED', 'true');
+      } else {
+        writeCollection_(request.collection, request.data);
+        PropertiesService.getScriptProperties()
+          .setProperty('DATABASE_INITIALIZED', 'true');
+      }
+      SpreadsheetApp.flush();
+    } finally {
+      lock.releaseLock();
+    }
+
+    return jsonResponse_({ ok: true });
+  } catch (error) {
+    return jsonResponse_({ ok: false, error: error.message || String(error) });
+  }
+}
+
+function jsonResponse_(data) {
+  return ContentService
+    .createTextOutput(JSON.stringify(data))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function readDatabase_() {
+  const database = {
+    initialized: PropertiesService.getScriptProperties()
+      .getProperty('DATABASE_INITIALIZED') === 'true',
+    galleryItems: [],
+    historyEntries: [],
+    siteImages: {},
+    musicConfig: {},
+  };
+
+  Object.keys(COLLECTION_SHEETS).forEach(function (collection) {
+    const sheet = getCollectionSheet_(collection);
+    const lastRow = sheet.getLastRow();
+    if (lastRow < 2) return;
+
+    const rows = sheet.getRange(2, 1, lastRow - 1, 2).getValues();
+    if (collection === 'galleryItems' || collection === 'historyEntries') {
+      database[collection] = rows.map(function (row) {
+        return JSON.parse(String(row[1]));
+      });
+    } else {
+      rows.forEach(function (row) {
+        database[collection][String(row[0])] = JSON.parse(String(row[1]));
+      });
+    }
+  });
+
+  return database;
+}
+
+function writeCollection_(collection, data) {
+  if (!Object.prototype.hasOwnProperty.call(COLLECTION_SHEETS, collection)) {
+    throw new Error('Jenis data tidak dikenal: ' + collection);
+  }
+
+  const isList = collection === 'galleryItems' || collection === 'historyEntries';
+  if (isList && !Array.isArray(data)) {
+    throw new Error(collection + ' harus berupa array.');
+  }
+  if (!isList && (!data || typeof data !== 'object' || Array.isArray(data))) {
+    throw new Error(collection + ' harus berupa object.');
+  }
+
+  const sheet = getCollectionSheet_(collection);
+  const header = isList
+    ? ['id', 'data_json', 'updated_at']
+    : ['key', 'value_json', 'updated_at'];
+  const records = isList
+    ? data.map(function (item) {
+        if (!item || typeof item !== 'object' || !item.id) {
+          throw new Error('Setiap item ' + collection + ' wajib memiliki id.');
+        }
+        return [String(item.id), JSON.stringify(item), new Date()];
+      })
+    : Object.keys(data).map(function (key) {
+        return [key, JSON.stringify(data[key]), new Date()];
+      });
+
+  records.forEach(function (record) {
+    if (String(record[1]).length > 49000) {
+      throw new Error('Satu nilai data terlalu besar untuk disimpan di Google Sheets.');
+    }
+  });
+
+  sheet.clearContents();
+  sheet.getRange(1, 1, 1, header.length).setValues([header]);
+  if (records.length) {
+    sheet.getRange(2, 1, records.length, header.length).setValues(records);
+  }
+}
+
+function getCollectionSheet_(collection) {
+  const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheetName = COLLECTION_SHEETS[collection];
+  if (!sheetName) throw new Error('Jenis data tidak dikenal: ' + collection);
+
+  let sheet = spreadsheet.getSheetByName(sheetName);
+  if (!sheet) {
+    sheet = spreadsheet.insertSheet(sheetName);
+    const header = collection === 'galleryItems' || collection === 'historyEntries'
+      ? ['id', 'data_json', 'updated_at']
+      : ['key', 'value_json', 'updated_at'];
+    sheet.getRange(1, 1, 1, header.length).setValues([header]);
+  }
+  return sheet;
+}
+
+BAGIAN 2 - DEPLOY SEBAGAI WEB APP
+---------------------------------
+
+1. Di editor Apps Script, pilih Deploy > New deployment.
+2. Klik ikon roda gigi, lalu pilih "Web app".
+3. Execute as: Me.
+4. Who has access: Anyone.
+5. Klik Deploy dan berikan izin Google saat diminta.
+6. Salin URL Web app yang berakhiran /exec.
+7. Jangan gunakan URL /dev untuk aplikasi yang dipakai sehari-hari.
+8. Jika deployment sudah pernah dibuat, pilih Deploy > Manage deployments >
+   Edit > New version > Deploy agar kode konfirmasi penyimpanan terbaru aktif.
+
+Opsi "Anyone" diperlukan agar backend Vercel dapat mengakses Web App tanpa
+login Google. Data baca galeri tetap bisa diakses publik melalui aplikasi.
+Penulisan hanya diterima jika token rahasia dari server cocok dengan Script
+Properties; jangan menaruh token tersebut di frontend.
+
+
+BAGIAN 3 - KONFIGURASI VERCEL DAN PASSWORD AMAN
+------------------------------------------------
+
+Password diverifikasi di server Vercel. Jangan gunakan awalan VITE_ untuk URL
+database, password, atau token rahasia; nilai VITE_ masuk ke bundle browser.
+
+1. Di Vercel buka Project > Settings > Environment Variables.
+2. Tambahkan variabel berikut untuk Production (tambahkan Preview/Development
+   jika environment tersebut dipakai):
+
+   GOOGLE_APPS_SCRIPT_URL
+   Nilai: URL Web App Apps Script yang berakhiran /exec.
+
+   GOOGLE_APPS_SCRIPT_TOKEN
+   Nilai: token acak panjang yang Anda buat sendiri.
+
+   APP_ACCESS_PASSWORD
+   Nilai: password untuk fitur tambah kenangan dan pengaturan.
+
+   APP_SESSION_SECRET
+   Nilai: secret acak panjang yang berbeda dari password dan token.
+
+3. Di Apps Script buka Project Settings > Script Properties > Add script
+   property:
+   Property: SERVER_API_TOKEN
+   Value: harus sama persis dengan GOOGLE_APPS_SCRIPT_TOKEN di Vercel.
+4. Simpan perubahan Apps Script. Jika kode berubah, deploy versi baru lewat
+   Deploy > Manage deployments > Edit > New version > Deploy.
+5. Hapus variabel lama VITE_GOOGLE_APPS_SCRIPT_URL dan
+   VITE_FEATURE_ACCESS_PASSWORD dari Vercel jika sebelumnya pernah dibuat.
+6. Setelah mengubah environment variables Vercel, lakukan redeploy.
+
+Browser hanya berkomunikasi dengan endpoint same-origin /api/access dan
+/api/database. Password diperiksa oleh function server; cookie sesi bertanda
+tangan memiliki HttpOnly, SameSite=Strict, dan Secure saat production.
+Penulisan database harus melewati sesi server dan token Apps Script. Endpoint
+Apps Script masih dapat dibaca publik untuk menampilkan galeri, tetapi
+penulisan langsung tanpa token server akan ditolak.
+
+API dibuat sebagai Nitro routes di routes/api/, dipindai dengan serverDir "./",
+dan plugin Nitro terpasang di vite.config.ts. Jalankan npm run dev untuk
+frontend dan API sekaligus. Untuk
+tes konfigurasi environment production, isi variabel yang sama di .env.local
+(tanpa prefix VITE_) dan gunakan vercel dev atau npm run dev.
+
+Di Vercel, pastikan Root Directory mengarah ke folder utama project ini yang
+memiliki package.json, vite.config.ts, dan routes/api/. Build Vite+Nitro
+mengemas frontend dan API agar endpoint /api/database serta /api/access
+dijalankan sebagai server, bukan mengirim source route ke browser.
+
+Aplikasi ini sudah disiapkan untuk menghubungkan URL tersebut. Saat pertama
+kali, masukkan password fitur; jika database Sheets belum diinisialisasi,
+data contoh bawaan aplikasi akan disimpan sebagai isi awal spreadsheet. Data
+localStorage lama tidak dibaca atau digunakan. Browser/perangkat lain memuat
+data dari spreadsheet.
+
+Tab yang dibuat otomatis di spreadsheet:
+- Gallery: daftar kenangan/foto.
+- History: riwayat menambah dan menghapus foto.
+- SiteImages: gambar hero, story, moments, dan footer.
+- MusicConfig: pengaturan musik.
+
+PENGUJIAN
+---------
+
+1. Buka website dan pastikan tidak muncul pesan gagal menghubungkan database.
+2. Tambahkan satu foto, lalu cek tab Gallery dan History.
+3. Ubah pengaturan gambar atau musik, lalu cek tab SiteImages/MusicConfig.
+4. Buka website di browser/perangkat lain untuk memeriksa data yang sama.
+5. Jika deploy ulang mengubah kode Apps Script, lakukan Deploy > Manage
+   deployments > Edit > New version > Deploy.
+
+Jika data tidak masuk, periksa:
+- GOOGLE_APPS_SCRIPT_URL di Vercel benar dan berakhiran /exec.
+- GOOGLE_APPS_SCRIPT_TOKEN di Vercel sama persis dengan SERVER_API_TOKEN
+  pada Script Properties Apps Script.
+- APP_ACCESS_PASSWORD dan APP_SESSION_SECRET disimpan sebagai variabel
+  server-only, tanpa awalan VITE_.
+- Web App sudah di-deploy dengan akses "Anyone".
+- Akun pemilik deployment sudah memberikan izin Spreadsheet.
+- Environment variables Vercel sudah disimpan dan project sudah redeploy.
+- Console browser dan Executions di Apps Script untuk melihat error.
+
+Cadangkan spreadsheet secara berkala. Perubahan data yang bersamaan pada
+kumpulan data yang sama (misalnya dua orang mengedit galeri tepat bersamaan)
+dapat saling menimpa; sistem ini cocok untuk aplikasi kecil/keluarga, bukan
+sebagai database transaksi ber-volume tinggi.
