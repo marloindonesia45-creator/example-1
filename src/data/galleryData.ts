@@ -6,6 +6,7 @@ export interface GalleryItem {
   date: string;
   location: string;
   image: string;
+  thumbnail?: string;
   aspectRatio?: string;
   story: string;
   likes: number;

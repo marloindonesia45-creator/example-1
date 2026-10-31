@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { GalleryItem } from '../data/galleryData';
 import { MapPin, Calendar, Heart, Download, Trash2, ChevronLeft, ChevronRight, History } from 'lucide-react';
 import { downloadImageAsJpg } from '../utils/downloadHelper';
+import { getGoogleDriveThumbnailUrl } from '../utils/googleDriveImages';
 
 interface GallerySectionProps {
   items: GalleryItem[];
@@ -115,7 +116,7 @@ export const GallerySection: React.FC<GallerySectionProps> = ({
             >
               {/* Image with fallback container */}
               <img
-                src={item.image}
+                src={item.thumbnail ?? getGoogleDriveThumbnailUrl(item.image) ?? item.image}
                 alt={item.title}
                 referrerPolicy="no-referrer"
                 loading="lazy"
@@ -126,6 +127,11 @@ export const GallerySection: React.FC<GallerySectionProps> = ({
                 }}
                 onError={(e) => {
                   const target = e.currentTarget;
+                  const originalUrl = new URL(item.image, window.location.href).href;
+                  if (target.src !== originalUrl) {
+                    target.src = item.image;
+                    return;
+                  }
                   target.style.display = 'none';
                   const fallback = target.nextElementSibling as HTMLElement;
                   if (fallback) fallback.style.display = 'flex';

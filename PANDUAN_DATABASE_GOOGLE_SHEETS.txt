@@ -10,7 +10,10 @@ data utama.
 CATATAN PENTING
 ---------------
 - Kolom gambar menyimpan URL/link gambar, bukan file gambar itu sendiri.
-  Link Google Drive harus dapat diakses oleh pengunjung aplikasi.
+  Link Google Drive harus dapat diakses oleh pengunjung aplikasi. Foto galeri
+  memakai thumbnail Google Drive lebar 800 px agar lebih ringan; URL asli tetap
+  disimpan untuk tampilan foto besar dan unduhan. Google Drive membuat thumbnail
+  saat diminta, sehingga file sumber di Drive tidak diubah atau dikompresi ulang.
 - Web App dengan akses "Anyone" dapat dibaca dan ditulis oleh siapa pun yang
   mengetahui URL deployment. Jangan gunakan untuk data rahasia atau sensitif.
 - Gunakan spreadsheet khusus untuk aplikasi ini. Jangan simpan data pribadi
