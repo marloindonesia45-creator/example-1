@@ -6,7 +6,6 @@ export interface PhotoHistoryEntry {
   userName: string;
   photoTitle: string;
   photoImage?: string;
-  photoThumbnail?: string;
   category?: string;
   location?: string;
   timestamp: string;

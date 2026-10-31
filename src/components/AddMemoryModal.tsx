@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { GalleryItem } from '../data/galleryData';
 import { X, Link2, CheckCircle2, AlertCircle, Info, Image as ImageIcon, HelpCircle, Move, ZoomIn, RotateCcw, Sliders } from 'lucide-react';
-import { getGoogleDriveThumbnailUrl } from '../utils/googleDriveImages';
 
 interface AddMemoryModalProps {
   isOpen: boolean;
@@ -166,7 +165,6 @@ export const AddMemoryModal: React.FC<AddMemoryModalProps> = ({
       location: location.trim() || 'Indonesia',
       date: date.trim() || 'Baru saja',
       image: imagePreview,
-      thumbnail: getGoogleDriveThumbnailUrl(imagePreview),
       story: story.trim(),
       likes: 1,
       objectPosition: `${posX}% ${posY}%`,
@@ -203,7 +201,7 @@ export const AddMemoryModal: React.FC<AddMemoryModalProps> = ({
         <div className="shrink-0 px-6 sm:px-8 pt-5 pb-4 border-b border-white/10 flex items-center justify-between bg-[#161a1d] z-20">
           <div>
             <h3 className="font-serif text-2xl font-normal text-white">Tambah Kenangan</h3>
-            <p className="text-xs text-white/60">Foto galeri memakai thumbnail ringan; foto asli tetap tersedia</p>
+            <p className="text-xs text-white/60">Simpan momen indah via link sharing Google Drive</p>
           </div>
           <button
             type="button"
@@ -446,12 +444,6 @@ export const AddMemoryModal: React.FC<AddMemoryModalProps> = ({
                   <p className="flex items-center gap-1.5 text-[11px] text-emerald-400 font-medium">
                     <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
                     <span>Link Google Drive terdeteksi & foto berhasil dimuat langsung!</span>
-                  </p>
-                )}
-
-                {imagePreview && getGoogleDriveThumbnailUrl(imagePreview) && (
-                  <p className="text-[11px] text-white/50">
-                    Galeri menggunakan thumbnail Google Drive lebar 800 px. Foto asli tetap digunakan saat dibuka dan diunduh.
                   </p>
                 )}
 

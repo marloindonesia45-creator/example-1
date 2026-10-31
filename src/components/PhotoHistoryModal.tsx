@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { PhotoHistoryEntry } from '../data/historyData';
 import { X, History, PlusCircle, Trash2, Search, Calendar, User, Clock, CheckCircle2, RotateCcw } from 'lucide-react';
-import { getGoogleDriveThumbnailUrl } from '../utils/googleDriveImages';
 
 interface PhotoHistoryModalProps {
   isOpen: boolean;
@@ -207,7 +206,7 @@ export const PhotoHistoryModal: React.FC<PhotoHistoryModalProps> = ({
                   {entry.photoImage && (
                     <div className="w-16 h-12 rounded-lg overflow-hidden bg-black/60 shrink-0 border border-white/10 relative shadow">
                       <img
-                        src={entry.photoThumbnail ?? getGoogleDriveThumbnailUrl(entry.photoImage) ?? entry.photoImage}
+                        src={entry.photoImage}
                         alt={entry.photoTitle}
                         referrerPolicy="no-referrer"
                         className={`w-full h-full object-cover ${
