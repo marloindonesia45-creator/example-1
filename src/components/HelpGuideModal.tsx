@@ -130,6 +130,9 @@ export const HelpGuideModal: React.FC<HelpGuideModalProps> = ({ isOpen, onClose 
                 <p className="text-[11px] text-white/60 pt-1">
                   Ukuran ini memastikan foto tetap tajam saat diperbesar di layar penuh (*Lightbox*) maupun di kartu galeri.
                 </p>
+                <p className="text-[11px] text-white/60">
+                  Foto baru dari Google Drive otomatis disajikan hingga maksimal 1600 px untuk mengurangi ukuran gambar yang dimuat. File asli di Drive tidak diubah.
+                </p>
               </div>
 
               {/* 2. Section Header Utama */}

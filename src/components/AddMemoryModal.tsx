@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { GalleryItem } from '../data/galleryData';
 import { X, Link2, CheckCircle2, AlertCircle, Info, Image as ImageIcon, HelpCircle, Move, ZoomIn, RotateCcw, Sliders } from 'lucide-react';
 
+const GOOGLE_DRIVE_IMAGE_MAX_SIZE = 1600;
+
 interface AddMemoryModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -21,7 +23,7 @@ export function convertGoogleDriveLink(inputUrl: string): { isGDrive: boolean; p
     return {
       isGDrive: true,
       fileId,
-      previewUrl: `https://lh3.googleusercontent.com/d/${fileId}`,
+      previewUrl: createOptimizedGoogleDriveUrl(fileId),
     };
   }
 
@@ -32,7 +34,7 @@ export function convertGoogleDriveLink(inputUrl: string): { isGDrive: boolean; p
     return {
       isGDrive: true,
       fileId,
-      previewUrl: `https://lh3.googleusercontent.com/d/${fileId}`,
+      previewUrl: createOptimizedGoogleDriveUrl(fileId),
     };
   }
 
@@ -43,11 +45,15 @@ export function convertGoogleDriveLink(inputUrl: string): { isGDrive: boolean; p
     return {
       isGDrive: true,
       fileId,
-      previewUrl: `https://lh3.googleusercontent.com/d/${fileId}`,
+      previewUrl: createOptimizedGoogleDriveUrl(fileId),
     };
   }
 
   return { isGDrive: false, previewUrl: trimmed };
+}
+
+function createOptimizedGoogleDriveUrl(fileId: string): string {
+  return `https://lh3.googleusercontent.com/d/${fileId}=w${GOOGLE_DRIVE_IMAGE_MAX_SIZE}`;
 }
 
 export const AddMemoryModal: React.FC<AddMemoryModalProps> = ({
@@ -201,7 +207,7 @@ export const AddMemoryModal: React.FC<AddMemoryModalProps> = ({
         <div className="shrink-0 px-6 sm:px-8 pt-5 pb-4 border-b border-white/10 flex items-center justify-between bg-[#161a1d] z-20">
           <div>
             <h3 className="font-serif text-2xl font-normal text-white">Tambah Kenangan</h3>
-            <p className="text-xs text-white/60">Simpan momen indah via link sharing Google Drive</p>
+            <p className="text-xs text-white/60">Foto Drive otomatis dioptimalkan hingga 1600 px</p>
           </div>
           <button
             type="button"
@@ -443,7 +449,7 @@ export const AddMemoryModal: React.FC<AddMemoryModalProps> = ({
                 {isGDriveValid && !imageLoadError && imagePreview && (
                   <p className="flex items-center gap-1.5 text-[11px] text-emerald-400 font-medium">
                     <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                    <span>Link Google Drive terdeteksi & foto berhasil dimuat langsung!</span>
+                    <span>Foto berhasil dimuat dan akan ditampilkan dengan resolusi maksimal 1600 px. File asli tetap aman di Google Drive.</span>
                   </p>
                 )}
 
