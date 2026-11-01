@@ -472,42 +472,6 @@ export const AddMemoryModal: React.FC<AddMemoryModalProps> = ({
                   </p>
                 )}
 
-                {/* Quick Presets for Demo Testing */}
-                <div className="flex items-center gap-2 pt-1">
-                  <span className="text-[11px] text-white/40">Contoh siap pakai:</span>
-                  <button
-                    type="button"
-                    onClick={() => setPresetPhoto(
-                      '/src/assets/images/story_polaroid_mountain_1792387567297.jpg',
-                      'https://drive.google.com/file/d/1demoMountainOverlookPhotos2024/view?usp=sharing'
-                    )}
-                    className="text-[11px] text-amber-300/80 hover:text-amber-200 hover:underline cursor-pointer"
-                  >
-                    Gunung
-                  </button>
-                  <span className="text-white/20">·</span>
-                  <button
-                    type="button"
-                    onClick={() => setPresetPhoto(
-                      '/src/assets/images/story_polaroid_sunset_1792387566720.jpg',
-                      'https://drive.google.com/file/d/1demoBeachSunsetFriends2024/view?usp=sharing'
-                    )}
-                    className="text-[11px] text-amber-300/80 hover:text-amber-200 hover:underline cursor-pointer"
-                  >
-                    Pantai
-                  </button>
-                  <span className="text-white/20">·</span>
-                  <button
-                    type="button"
-                    onClick={() => setPresetPhoto(
-                      '/src/assets/images/story_polaroid_peace_1792387567250.jpg',
-                      'https://drive.google.com/file/d/1demoPeaceSignTwilight2024/view?usp=sharing'
-                    )}
-                    className="text-[11px] text-amber-300/80 hover:text-amber-200 hover:underline cursor-pointer"
-                  >
-                    Peace
-                  </button>
-                </div>
               </div>
             </div>
 

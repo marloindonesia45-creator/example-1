@@ -27,14 +27,8 @@ export const ImageSettingsModal: React.FC<ImageSettingsModalProps> = ({
     const list: { id: string; image: string; title: string; category: string }[] = [];
     const seenUrls = new Set<string>();
 
-    // Add preset photos first
-    const presets = [
-      { id: 'preset-summit', image: '/src/assets/images/hero_friends_summit_1792387566312.jpg', title: 'Puncak Senja', category: 'Gunung' },
-      { id: 'preset-ocean', image: '/src/assets/images/banner_ocean_sunset_1792387568878.jpg', title: 'Senja Pantai & Ombak', category: 'Pantai' },
-      { id: 'preset-beach-jump', image: '/src/assets/images/story_polaroid_sunset_1792387566720.jpg', title: 'Tawa Senja Pantai', category: 'Pantai' },
-      { id: 'preset-mountain-look', image: '/src/assets/images/story_polaroid_mountain_1792387567297.jpg', title: 'Lembah Hijau', category: 'Gunung' },
-      { id: 'preset-peace-twilight', image: '/src/assets/images/story_polaroid_peace_1792387567250.jpg', title: 'Tanda Damai (Peace)', category: 'Momen' },
-    ];
+    // Built-in photo presets are intentionally removed so the site ships without bundled stock images.
+    const presets: { id: string; image: string; title: string; category: string }[] = [];
 
     presets.forEach((p) => {
       seenUrls.add(p.image);

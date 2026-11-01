@@ -9,9 +9,9 @@ interface OurStorySectionProps {
 
 export const OurStorySection: React.FC<OurStorySectionProps> = ({
   onSelectPhoto,
-  storyPhoto1 = '/src/assets/images/story_polaroid_sunset_1792387566720.jpg',
-  storyPhoto2 = '/src/assets/images/story_polaroid_mountain_1792387567297.jpg',
-  storyPhoto3 = '/src/assets/images/story_polaroid_peace_1792387567250.jpg',
+  storyPhoto1 = '',
+  storyPhoto2 = '',
+  storyPhoto3 = '',
 }) => {
   return (
     <section id="story" className="relative bg-[#ECE7DF] text-[#24272B] py-20 sm:py-28 overflow-hidden">
@@ -54,13 +54,19 @@ export const OurStorySection: React.FC<OurStorySectionProps> = ({
             >
               {/* Washi Tape Strip */}
               <div className="washi-tape top-[-10px] left-1/2 transform -translate-x-1/2 w-16 sm:w-20 h-5 sm:h-6 -rotate-2" />
-              <div className="aspect-[4/3] overflow-hidden bg-neutral-200">
-                <img
-                  src={storyPhoto1}
-                  alt="Sahabat tertawa bersama di pantai saat senja"
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
+              <div className="aspect-[4/3] overflow-hidden bg-gradient-to-br from-stone-200 via-stone-300 to-[#d9d4cc]">
+                {storyPhoto1 ? (
+                  <img
+                    src={storyPhoto1}
+                    alt="Sahabat tertawa bersama di pantai saat senja"
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-end justify-center p-4 text-[10px] uppercase tracking-[0.35em] text-stone-500 text-center">
+                    Memory
+                  </div>
+                )}
               </div>
             </div>
 
@@ -75,13 +81,19 @@ export const OurStorySection: React.FC<OurStorySectionProps> = ({
             >
               {/* Washi Tape Strip */}
               <div className="washi-tape top-[-10px] left-1/2 transform -translate-x-1/2 w-14 sm:w-16 h-5 sm:h-6 rotate-1" />
-              <div className="aspect-[4/3] overflow-hidden bg-neutral-200">
-                <img
-                  src={storyPhoto2}
-                  alt="Tiga sahabat merangkul di puncak bukit"
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
+              <div className="aspect-[4/3] overflow-hidden bg-gradient-to-br from-stone-200 via-stone-300 to-[#d9d4cc]">
+                {storyPhoto2 ? (
+                  <img
+                    src={storyPhoto2}
+                    alt="Tiga sahabat merangkul di puncak bukit"
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-end justify-center p-4 text-[10px] uppercase tracking-[0.35em] text-stone-500 text-center">
+                    Story
+                  </div>
+                )}
               </div>
             </div>
 
@@ -96,13 +108,19 @@ export const OurStorySection: React.FC<OurStorySectionProps> = ({
             >
               {/* Washi Tape Strip */}
               <div className="washi-tape top-[-8px] right-6 w-12 sm:w-16 h-4 sm:h-5 -rotate-6" />
-              <div className="aspect-[4/3] overflow-hidden bg-neutral-200">
-                <img
-                  src={storyPhoto3}
-                  alt="Tangan membentuk tanda peace saat twilight"
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
+              <div className="aspect-[4/3] overflow-hidden bg-gradient-to-br from-stone-200 via-stone-300 to-[#d9d4cc]">
+                {storyPhoto3 ? (
+                  <img
+                    src={storyPhoto3}
+                    alt="Tangan membentuk tanda peace saat twilight"
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-end justify-center p-4 text-[10px] uppercase tracking-[0.35em] text-stone-500 text-center">
+                    Together
+                  </div>
+                )}
               </div>
             </div>
 

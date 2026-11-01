@@ -6,7 +6,7 @@ interface OutroSectionProps {
 }
 
 export const OutroSection: React.FC<OutroSectionProps> = ({
-  backgroundImage = '/src/assets/images/banner_ocean_sunset_1792387568878.jpg',
+  backgroundImage = '',
 }) => {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -16,12 +16,16 @@ export const OutroSection: React.FC<OutroSectionProps> = ({
     <footer className="relative min-h-[500px] sm:min-h-[580px] flex flex-col justify-between overflow-hidden text-white">
       {/* Background Ocean Sunset */}
       <div className="absolute inset-0">
-        <img
-          src={backgroundImage}
-          alt="Matahari terbenam di atas laut dan ombak pantai"
-          referrerPolicy="no-referrer"
-          className="w-full h-full object-cover object-center"
-        />
+        {backgroundImage ? (
+          <img
+            src={backgroundImage}
+            alt="Matahari terbenam di atas laut dan ombak pantai"
+            referrerPolicy="no-referrer"
+            className="w-full h-full object-cover object-center"
+          />
+        ) : (
+          <div className="w-full h-full bg-[radial-gradient(circle_at_top,_rgba(251,191,36,0.22),_rgba(15,23,42,0.8)_42%,_rgba(2,6,23,0.96)_100%)]" />
+        )}
         {/* Warm Vignette Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/60" />
       </div>

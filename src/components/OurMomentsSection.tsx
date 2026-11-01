@@ -5,18 +5,22 @@ interface OurMomentsSectionProps {
 }
 
 export const OurMomentsSection: React.FC<OurMomentsSectionProps> = ({
-  backgroundImage = '/src/assets/images/banner_ocean_sunset_1792387568878.jpg',
+  backgroundImage = '',
 }) => {
   return (
     <section id="moments" className="relative min-h-[520px] sm:min-h-[580px] flex items-center overflow-hidden">
       {/* Background Image with Dark Vignette */}
       <div className="absolute inset-0">
-        <img
-          src={backgroundImage}
-          alt="Senja hangat di atas laut dan tebing perbukitan"
-          referrerPolicy="no-referrer"
-          className="w-full h-full object-cover object-bottom"
-        />
+        {backgroundImage ? (
+          <img
+            src={backgroundImage}
+            alt="Senja hangat di atas laut dan tebing perbukitan"
+            referrerPolicy="no-referrer"
+            className="w-full h-full object-cover object-bottom"
+          />
+        ) : (
+          <div className="w-full h-full bg-[radial-gradient(circle_at_top,_rgba(251,191,36,0.25),_rgba(15,23,42,0.8)_38%,_rgba(2,6,23,0.95)_100%)]" />
+        )}
         {/* Gradients to match screenshot mood */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-black/30" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#121517] via-transparent to-black/50" />

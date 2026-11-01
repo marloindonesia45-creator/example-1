@@ -7,8 +7,8 @@ interface HeroSectionProps {
 }
 
 export const HeroSection: React.FC<HeroSectionProps> = ({
-  heroSlide1 = '/src/assets/images/hero_friends_summit_1792387566312.jpg',
-  heroSlide2 = '/src/assets/images/banner_ocean_sunset_1792387568878.jpg',
+  heroSlide1 = '',
+  heroSlide2 = '',
 }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -24,7 +24,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       ),
       subtext: 'Bukan hanya tentang tempat yang kita kunjungi, tapi tentang orang-orang yang selalu ada di setiap langkah.',
       handwrittenLines: ['Same people', 'Different places', 'Still us.'],
-      bgImage: heroSlide1,
+      bgImage: heroSlide1 || '',
       bgAlt: 'Sahabat duduk di puncak gunung saat matahari terbit keemasan'
     },
     {
@@ -38,7 +38,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       ),
       subtext: 'Menyimpan tawa, jejak cerita, dan hangatnya kebersamaan yang takkan pernah pudar oleh jarak dan waktu.',
       handwrittenLines: ['Time flies', 'Memories stay', 'Forever us.'],
-      bgImage: heroSlide2,
+      bgImage: heroSlide2 || '',
       bgAlt: 'Pemandangan senja keemasan di atas pantai dan perbukitan'
     }
   ];
@@ -56,24 +56,32 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   return (
     <section id="home" className="relative min-h-[92vh] sm:min-h-screen flex items-center justify-between overflow-hidden">
       {/* Background Images with Crossfade */}
-      {slides.map((slide, idx) => (
-        <div
-          key={idx}
-          className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-            idx === currentSlide ? 'opacity-100 z-0' : 'opacity-0 -z-10'
-          }`}
-        >
-          <img
-            src={slide.bgImage}
-            alt={slide.bgAlt}
-            referrerPolicy="no-referrer"
-            className="w-full h-full object-cover object-center scale-[1.02]"
-          />
-          {/* Subtle gradient overlays for cinematic mood and reading legibility */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/40 to-transparent sm:via-black/30" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#121517] via-transparent to-black/40 sm:to-black/30" />
-        </div>
-      ))}
+      {slides.map((slide, idx) => {
+        const hasImage = Boolean(slide.bgImage);
+
+        return (
+          <div
+            key={idx}
+            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+              idx === currentSlide ? 'opacity-100 z-0' : 'opacity-0 -z-10'
+            }`}
+          >
+            {hasImage ? (
+              <img
+                src={slide.bgImage}
+                alt={slide.bgAlt}
+                referrerPolicy="no-referrer"
+                className="w-full h-full object-cover object-center scale-[1.02]"
+              />
+            ) : (
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(251,191,36,0.25),_rgba(15,23,42,0.78)_42%,_rgba(2,6,23,0.97)_100%)]" />
+            )}
+            {/* Subtle gradient overlays for cinematic mood and reading legibility */}
+            <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/40 to-transparent sm:via-black/30" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#121517] via-transparent to-black/40 sm:to-black/30" />
+          </div>
+        );
+      })}
 
       {/* Main Content Area */}
       <div className="relative z-10 w-full max-w-7xl mx-auto px-6 sm:px-12 pt-32 pb-20 sm:py-36 flex flex-col justify-between min-h-[85vh]">
