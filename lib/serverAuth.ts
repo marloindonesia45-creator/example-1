@@ -15,20 +15,36 @@ export function getServerEnvironment(
   const eventContext = context as {
     cloudflare?: { env?: Record<string, unknown> };
     env?: Record<string, unknown>;
+    siteEnv?: Record<string, string | undefined>; // Interseptor data siteEnv dari KV middleware
   } | undefined;
+  
   const workerEnvironment = (globalThis as typeof globalThis & {
     __env__?: Record<string, unknown>;
   }).__env__;
+  
   const bindings =
     runtimeRequest.runtime?.cloudflare?.env ??
     eventContext?.cloudflare?.env ??
     eventContext?.env ??
     workerEnvironment;
+    
   const environment: ServerEnvironment = { ...process.env };
 
   if (bindings) {
     for (const [key, value] of Object.entries(bindings)) {
       if (typeof value === 'string') environment[key] = value;
+    }
+  }
+
+  // =========================================================================
+  // LOGIKA UTAMA MULTI-TENANT: Jika context membawa data env dinamis dari KV,
+  // timpa variabel bawaan secara real-time khusus untuk request saat ini.
+  // =========================================================================
+  if (eventContext && eventContext.siteEnv) {
+    for (const [key, value] of Object.entries(eventContext.siteEnv)) {
+      if (value !== undefined) {
+        environment[key] = value;
+      }
     }
   }
 

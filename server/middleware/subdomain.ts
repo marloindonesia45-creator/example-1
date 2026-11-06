@@ -1,54 +1,42 @@
 import { defineEventHandler, getRequestHost, createError } from 'h3';
 
 export default defineEventHandler(async (event: any) => {
-  const hostname = getRequestHost(event); // Hasil: "namaweb.memory.madebymarlo.my.id"
+  const hostname = getRequestHost(event); // Hasil: namaweb.memory.madebymarlo.my.id
   const parts = hostname.split('.');
-  
-  // Karena formatnya: [namaweb] . [memory] . [madebymarlo] . [my] . [id]
-  // Maka parts[0] adalah "namaweb"
-  const namaWeb = parts[0]; 
+  const namaWeb = parts[0]; // Mengambil kata paling depan (subdomain kustom)
 
-  // Abaikan jika diakses lewat domain induk tingkat dua atau localhost development
+  // Abaikan jika diakses lewat domain utama, localhost development, atau file aset statis (.css, .js, .png)
   if (
     namaWeb === 'memory' || 
     namaWeb === 'localhost' || 
     namaWeb === 'www' || 
-    event.path.includes('.') || 
-    event.path.startsWith('/assets')
+    event.path.includes('.') || // Memastikan file gambar/ikon/aset statis tidak dicegat
+    event.path.startsWith('/assets/')
   ) {
     return; 
   }
 
+  // Ambil database KV dari environment Cloudflare Module
   const { DATABASE_WEBSITE } = event.context.cloudflare.env;
   
   if (!DATABASE_WEBSITE) {
-    return "<h1>Database KV tidak terhubung. Periksa binding di Cloudflare!</h1>";
+    return;
   }
 
+  // Ambil data string JSON dari KV berdasarkan nama subdomain
   const rawData = await DATABASE_WEBSITE.get(namaWeb);
 
   if (!rawData) {
     throw createError({ 
       statusCode: 404, 
-      statusMessage: 'Website atau konfigurasi tidak ditemukan' 
+      statusMessage: `Website ${namaWeb} belum didaftarkan di database.` 
     });
   }
 
+  // Parse data JSON yang dikirim dari uploader.js
   const siteConfig = JSON.parse(rawData);
-  const currentEnv = siteConfig.env;
 
-  return `
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <title>${currentEnv.NAMA_WEBSITE || 'Website'}</title>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <style>body { background-color: ${currentEnv.WARNA_TEMA || '#ffffff'}; font-family: sans-serif; }</style>
-      </head>
-      <body>
-        ${siteConfig.htmlContent}
-      </body>
-    </html>
-  `;
+  // SUNTIKKAN ENV KHUSUS INI KE CONTEXT RUNTIME NITRO
+  // Baris ini krusial agar endpoint /api/* Anda dapat membaca data env unik ini!
+  event.context.siteEnv = siteConfig.env;
 });
