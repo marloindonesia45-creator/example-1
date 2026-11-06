@@ -1,5 +1,6 @@
-// server/middleware/subdomain.ts
-export default defineEventHandler(async (event) => {
+import { defineEventHandler, getRequestHost, createError } from 'h3';
+
+export default defineEventHandler(async (event: any) => {
   const hostname = getRequestHost(event); // Contoh: web1.memory.marloindonesia45.workers.dev
   const parts = hostname.split('.');
   const namaWeb = parts[0]; // Mengambil subdomain pertama ("web1")
