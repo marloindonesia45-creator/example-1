@@ -7,7 +7,7 @@ import {defineConfig} from 'vite';
 export default defineConfig(() => {
   return {
     plugins: [
-      nitro({ serverDir: './', preset: 'cloudflare_module' }),
+      nitro({ serverDir: './', scanDirs: ['./server'], preset: 'cloudflare_module' }),
       react(),
       tailwindcss(),
     ],
