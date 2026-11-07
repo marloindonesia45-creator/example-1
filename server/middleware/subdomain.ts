@@ -1,50 +1,40 @@
-import { createError, defineEventHandler, getRequestHost } from 'h3';
-
-const tenantApiRoutes = new Set(['/api/config', '/api/access', '/api/database']);
+import { defineEventHandler, getRequestHost, createError } from 'h3';
 
 export default defineEventHandler(async (event: any) => {
-  const hostname = getRequestHost(event);
+  const hostname = getRequestHost(event); // Hasil: romance.madebymarlo.my.id
   const parts = hostname.split('.');
-  const namaWeb = parts[0];
-  const isConfigRoute = event.path === '/api/config';
+  const namaWeb = parts[0]; // Mengambil subdomain paling depan ("romance")
 
   if (
-    namaWeb === 'web' ||
-    namaWeb === 'localhost' ||
-    namaWeb === 'www' ||
-    event.path.includes('.') ||
-    event.path.startsWith('/assets/') ||
-    (event.path.startsWith('/api/') && !tenantApiRoutes.has(event.path))
+    namaWeb === 'memory' || 
+    namaWeb === 'localhost' || 
+    namaWeb === 'www' || 
+    event.path.includes('.') || 
+    event.path.startsWith('/assets/')
   ) {
     return;
   }
 
   const envSource: Record<string, unknown> | undefined =
-    event.context?.cloudflare?.env ||
-    event.context?.env ||
+    event.context?.cloudflare?.env ??
+    event.context?.env ??
     (globalThis as typeof globalThis & { __env__?: Record<string, unknown> }).__env__;
   const databaseWebsite = envSource?.DATABASE_WEBSITE;
 
   if (!isKVNamespace(databaseWebsite)) {
-    if (isConfigRoute) {
-      event.context.siteEnv = {};
-      return;
-    }
     throw createError({
       statusCode: 503,
       statusMessage: 'Binding Cloudflare KV DATABASE_WEBSITE tidak tersedia.',
     });
   }
 
+  // Ambil data string JSON dari KV berdasarkan nama subdomain kustom (misal: "romance")
   const rawData = await databaseWebsite.get(namaWeb);
+
   if (!rawData) {
-    if (isConfigRoute) {
-      event.context.siteEnv = {};
-      return;
-    }
-    throw createError({
-      statusCode: 404,
-      statusMessage: `Website dengan subdomain '${namaWeb}' belum didaftarkan di database KV.`,
+    throw createError({ 
+      statusCode: 404, 
+      statusMessage: `Website dengan subdomain '${namaWeb}' belum didaftarkan di database KV.` 
     });
   }
 
@@ -72,7 +62,8 @@ export default defineEventHandler(async (event: any) => {
       statusMessage: `Konfigurasi env KV untuk subdomain '${namaWeb}' tidak valid.`,
     });
   }
-
+  
+  // Suntikkan .env rahasia milik domain "romance" ke runtime context Nitro
   event.context.siteEnv = siteEnv;
 });
 
