@@ -5,23 +5,24 @@ export default defineEventHandler(async (event: any) => {
   const parts = hostname.split('.');
   const namaWeb = parts[0]; // Mengambil subdomain paling depan ("romance")
 
-  // Daftar pengecualian domain induk atau lokal agar tidak ikut mencari ke database KV
+  // =========================================================================
+  // PERBAIKAN: Tambahkan event.path.startsWith('/api/') agar semua rute API
+  // internal tidak sengaja dicegat oleh pencarian database KV.
+  // =========================================================================
   if (
     namaWeb === 'memory' || 
     namaWeb === 'localhost' || 
     namaWeb === 'www' || 
     event.path.includes('.') || 
-    event.path.startsWith('/assets/')
+    event.path.startsWith('/assets/') ||
+    event.path.startsWith('/api/') 
   ) {
-    return; 
+    return; // Teruskan langsung ke endpoint API internal atau aplikasi React utama
   }
 
-  // Ambil binding Cloudflare KV dari environment secara aman (mendukung beberapa struktur runtime Nitro)
-  const envSource = event.context?.cloudflare?.env || event.context?.env || (globalThis as any).__env__;
-  const DATABASE_WEBSITE = envSource?.DATABASE_WEBSITE;
+  const { DATABASE_WEBSITE } = event.context.cloudflare.env;
   
   if (!DATABASE_WEBSITE) {
-    console.error("❌ Eror: Bindings DATABASE_WEBSITE tidak ditemukan di context Cloudflare!");
     return;
   }
 
@@ -31,13 +32,12 @@ export default defineEventHandler(async (event: any) => {
   if (!rawData) {
     throw createError({ 
       statusCode: 404, 
-      statusMessage: `Subdomain '${namaWeb}' belum terdaftar di database KV.` 
+      statusMessage: `Website dengan subdomain '${namaWeb}' belum didaftarkan di database KV.` 
     });
   }
 
-  // Parse data JSON yang dikirim dari uploader.js
   const siteConfig = JSON.parse(rawData);
   
-  // Amankan penyuntikkan ke runtime context agar terbaca oleh getServerEnvironment
+  // Suntikkan .env rahasia milik domain "romance" ke runtime context Nitro
   event.context.siteEnv = siteConfig.env;
 });
