@@ -20,6 +20,7 @@ import { defaultMusicConfig, MusicConfig } from './data/musicConfig';
 import { PhotoHistoryEntry, initialHistoryEntries, getCurrentFormattedTimestamp } from './data/historyData';
 import { CheckCircle2 } from 'lucide-react';
 import {
+  loadGoogleSheetsConfig,
   loadGoogleSheetsDatabase,
   saveGoogleSheetsCollection,
   saveGoogleSheetsDatabase,
@@ -44,6 +45,7 @@ export default function App() {
   const [isDatabaseInitialized, setIsDatabaseInitialized] = useState(false);
   const [isDatabaseAvailable, setIsDatabaseAvailable] = useState(false);
   const [isDatabaseLoading, setIsDatabaseLoading] = useState(true);
+  const [googleAppsScriptUrl, setGoogleAppsScriptUrl] = useState<string | null>(null);
   const [hasWriteAccess, setHasWriteAccess] = useState(false);
   const [isAccessModalOpen, setIsAccessModalOpen] = useState(false);
   const [pendingDeletePhoto, setPendingDeletePhoto] = useState<GalleryItem | null>(null);
@@ -55,7 +57,7 @@ export default function App() {
     action: NonNullable<typeof pendingProtectedAction>,
     photo?: GalleryItem,
   ) => {
-    if (!isDatabaseAvailable) {
+    if (!isDatabaseAvailable || !googleAppsScriptUrl) {
       setToastMessage('Database belum siap. Periksa konfigurasi dan muat ulang aplikasi.');
       return;
     }
@@ -94,6 +96,10 @@ export default function App() {
 
     const loadDatabase = async () => {
       try {
+        const config = await loadGoogleSheetsConfig();
+        if (isCancelled) return;
+        setGoogleAppsScriptUrl(config.GOOGLE_APPS_SCRIPT_URL);
+
         const database = await loadGoogleSheetsDatabase();
         if (isCancelled) return;
 

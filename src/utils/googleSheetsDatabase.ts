@@ -25,7 +25,25 @@ interface SaveRequest {
   data: GoogleSheetsDatabase | unknown;
 }
 
+export interface GoogleSheetsRuntimeConfig {
+  GOOGLE_APPS_SCRIPT_URL: string;
+}
+
 const saveQueues = new Map<string, Promise<void>>();
+
+export async function loadGoogleSheetsConfig(): Promise<GoogleSheetsRuntimeConfig> {
+  const response = await fetch('/api/config', {
+    method: 'GET',
+    credentials: 'same-origin',
+    cache: 'no-store',
+  });
+  const result = await readResponse<GoogleSheetsRuntimeConfig>(response);
+  if (typeof result.GOOGLE_APPS_SCRIPT_URL !== 'string' ||
+      !result.GOOGLE_APPS_SCRIPT_URL.trim()) {
+    throw new Error('GOOGLE_APPS_SCRIPT_URL tidak tersedia pada konfigurasi situs ini.');
+  }
+  return result;
+}
 
 export async function loadGoogleSheetsDatabase(): Promise<GoogleSheetsDatabase> {
   const response = await fetch('/api/database', {
