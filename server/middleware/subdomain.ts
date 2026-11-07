@@ -5,19 +5,14 @@ export default defineEventHandler(async (event: any) => {
   const parts = hostname.split('.');
   const namaWeb = parts[0]; // Mengambil subdomain paling depan ("romance")
 
-  // =========================================================================
-  // PERBAIKAN: Tambahkan event.path.startsWith('/api/') agar semua rute API
-  // internal tidak sengaja dicegat oleh pencarian database KV.
-  // =========================================================================
   if (
     namaWeb === 'memory' || 
     namaWeb === 'localhost' || 
     namaWeb === 'www' || 
     event.path.includes('.') || 
-    event.path.startsWith('/assets/') ||
-    event.path.startsWith('/api/') 
+    event.path.startsWith('/assets/')
   ) {
-    return; // Teruskan langsung ke endpoint API internal atau aplikasi React utama
+    return;
   }
 
   const { DATABASE_WEBSITE } = event.context.cloudflare.env;
