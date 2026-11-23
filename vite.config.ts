@@ -4,16 +4,20 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 import {defineConfig} from 'vite';
 
-export default defineConfig(() => {
+export default defineConfig(({ command }) => {
   return {
     plugins: [
-      nitro({ serverDir: './', scanDirs: ['./server'], preset: 'cloudflare_module' }),
+      nitro({
+        serverDir: './',
+        scanDirs: ['./server'],
+        preset: command === 'serve' ? 'node_server' : 'cloudflare_module',
+      }),
       react(),
       tailwindcss(),
     ],
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, '.'),
+        '@': path.resolve(import.meta.dirname, '.'),
       },
     },
     server: {

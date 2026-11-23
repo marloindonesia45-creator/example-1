@@ -1,0 +1,83 @@
+DESKRIPSI WEBSITE
+=================================
+
+Nama produk: Untuk Circle (lebih dari 3 pemesanan)
+Kategori: Website galeri kenangan dan cerita kebersamaan
+Format: Website satu halaman (single-page)
+Bahasa konten: Indonesia dan Inggris
+
+
+DESKRIPSI SINGKAT
+-----------------
+Together adalah website personal untuk mengabadikan cerita, foto, dan
+kenangan bersama sahabat atau orang-orang terdekat. Galeri foto, kisah
+kebersamaan, musik, dan tampilan halaman dapat disesuaikan agar website terasa
+lebih personal dan menjadi ruang digital untuk mengenang perjalanan bersama.
+
+
+DESKRIPSI PEMASARAN
+-------------------
+Setiap perjalanan punya cerita. Simpan tawa, tempat, dan momen sederhana dalam
+satu website yang bisa dinikmati bersama.
+
+Together menghadirkan suasana hangat melalui galeri foto, kolase bergaya
+Polaroid, cerita kebersamaan, dan pilihan musik kenangan. Tambahkan foto beserta
+judul, lokasi, tanggal, kategori, nama pengunggah, dan ceritanya; atur tampilan
+foto sesuai keinginan; lalu bagikan halaman kenangan kepada orang-orang
+terdekat.
+
+
+NILAI UTAMA
+-----------
+- Membantu mengumpulkan kenangan dalam satu galeri yang mudah dijelajahi.
+- Mengubah kumpulan foto menjadi cerita visual yang terasa personal.
+- Memudahkan penyesuaian gambar dan musik tanpa mengubah kode aplikasi.
+- Cocok sebagai hadiah digital, album perjalanan, kenang-kenangan komunitas,
+  atau arsip momen keluarga dan sahabat.
+
+
+FITUR UTAMA
+-----------
+1. Beranda dengan dua slide
+   Menampilkan pesan pembuka dan gambar latar yang dapat disesuaikan.
+   Pengunjung dapat berpindah slide menggunakan tombol navigasi.
+
+2. Cerita kebersamaan
+   Bagian editorial dengan kolase tiga foto bergaya Polaroid. Foto dapat
+   dipilih untuk dibuka dalam tampilan foto.
+
+3. Galeri foto kenangan
+   Foto dapat dikelompokkan ke dalam kategori Perjalanan, Kegiatan, Harian,
+   dan Lainnya. Galeri menampilkan maksimal 12 foto per halaman, dilengkapi
+   navigasi halaman.
+
+4. Detail foto dan interaksi
+   Pengunjung dapat membuka foto dalam tampilan besar, melihat informasi
+   cerita, lokasi, tanggal, kategori, dan pengunggah, memberi tanda suka, serta
+   mengunduh foto sebagai JPG.
+
+5. Tambah kenangan
+   Formulir untuk menambahkan foto dengan judul, nama pengunggah, kategori,
+   lokasi, tanggal, dan cerita. Link berbagi Google Drive dapat dikonversi
+   untuk pratinjau gambar; posisi dan pembesaran foto dapat diatur.
+
+6. Pengaturan visual dan musik
+   Pengelola dapat memilih gambar untuk slide beranda, kolase cerita, bagian
+   Our Moments, dan footer. Musik dapat menggunakan video YouTube atau mode
+   musik ambient bawaan.
+
+7. Riwayat aktivitas foto
+   Menampilkan catatan penambahan dan penghapusan foto, termasuk nama dan waktu
+   aktivitas.
+
+8. Akses fitur pengelola
+   Penambahan dan penghapusan foto serta pengaturan gambar dan musik dilindungi
+   password. Penghapusan foto juga meminta konfirmasi nama.
+
+9. Panduan penggunaan
+   Panduan di dalam website menjelaskan cara menggunakan link Google Drive,
+   fitur, dan rekomendasi ukuran gambar.
+
+10. Navigasi responsif
+    Tata letak menyesuaikan layar desktop dan ponsel, dengan menu navigasi dan
+    tombol kembali ke atas.

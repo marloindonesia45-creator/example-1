@@ -1,7 +1,7 @@
 import { defineEventHandler, getRequestHost, createError } from 'h3';
 
 export default defineEventHandler(async (event: any) => {
-  const hostname = getRequestHost(event); // Hasil: romance.madebymarlo.my.id
+  const hostname = getRequestHost(event).split(':')[0]; // Hasil: romance.madebymarlo.my.id
   const parts = hostname.split('.');
   const namaWeb = parts[0]; // Mengambil subdomain paling depan ("romance")
 
