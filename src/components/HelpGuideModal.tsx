@@ -248,14 +248,6 @@ export const HelpGuideModal: React.FC<HelpGuideModalProps> = ({ isOpen, onClose 
                 <h4 className="text-sm font-medium text-white">Tutorial 3 Tahapan</h4>
                 <div className="grid grid-cols-1 gap-3">
                   <div className="overflow-hidden rounded-xl border border-white/10 bg-black/20">
-                    <div className="aspect-video overflow-hidden border-b border-white/10 bg-black">
-                      <img
-                        src="/assets/gif/tutorial-upload-foto-google-drive.gif"
-                        alt="Tahap 1: unggah dan buka folder foto di Google Drive"
-                        className="h-full w-full object-contain"
-                        loading="lazy"
-                      />
-                    </div>
                     <div className="p-3">
                       <p className="mb-1 flex items-center gap-2 text-xs font-semibold text-amber-300">
                         <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-400 text-[11px] text-black">1</span>
@@ -265,17 +257,17 @@ export const HelpGuideModal: React.FC<HelpGuideModalProps> = ({ isOpen, onClose 
                         Buka folder tujuan di Google Drive, lalu upload foto yang diinginkan.
                       </p>
                     </div>
-                  </div>
-
-                  <div className="overflow-hidden rounded-xl border border-white/10 bg-black/20">
                     <div className="aspect-video overflow-hidden border-b border-white/10 bg-black">
                       <img
-                        src="/assets/gif/tutorial-copy-link-google-drive.gif"
-                        alt="Tahap 2: buka folder foto dan salin link Google Drive"
+                        src="/assets/gif/tutorial-upload-foto-google-drive.gif"
+                        alt="Tahap 1: unggah dan buka folder foto di Google Drive"
                         className="h-full w-full object-contain"
                         loading="lazy"
                       />
                     </div>
+                  </div>
+
+                  <div className="overflow-hidden rounded-xl border border-white/10 bg-black/20">
                     <div className="p-3">
                       <p className="mb-1 flex items-center gap-2 text-xs font-semibold text-cyan-300">
                         <span className="flex h-5 w-5 items-center justify-center rounded-full bg-cyan-400 text-[11px] text-black">2</span>
@@ -285,17 +277,17 @@ export const HelpGuideModal: React.FC<HelpGuideModalProps> = ({ isOpen, onClose 
                         Buka folder yang berisi foto, pilih foto, ubah akses menjadi tersedia bagi siapa saja yang memiliki link, lalu salin link.
                       </p>
                     </div>
-                  </div>
-
-                  <div className="overflow-hidden rounded-xl border border-white/10 bg-black/20">
                     <div className="aspect-video overflow-hidden border-b border-white/10 bg-black">
                       <img
-                        src="/assets/gif/tutorial-paste-link-foto-together.gif"
-                        alt="Tahap 3: tempel link Google Drive pada website Together"
+                        src="/assets/gif/tutorial-copy-link-google-drive.gif"
+                        alt="Tahap 2: buka folder foto dan salin link Google Drive"
                         className="h-full w-full object-contain"
                         loading="lazy"
                       />
                     </div>
+                  </div>
+
+                  <div className="overflow-hidden rounded-xl border border-white/10 bg-black/20">
                     <div className="p-3">
                       <p className="mb-1 flex items-center gap-2 text-xs font-semibold text-emerald-300">
                         <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-400 text-[11px] text-black">3</span>
@@ -304,6 +296,14 @@ export const HelpGuideModal: React.FC<HelpGuideModalProps> = ({ isOpen, onClose 
                       <p className="text-[11px] leading-relaxed text-white/60">
                         Buka Tambah Kenangan, tempel link Google Drive pada kolom, lalu pastikan foto berhasil muncul.
                       </p>
+                    </div>
+                    <div className="aspect-video overflow-hidden border-b border-white/10 bg-black">
+                      <img
+                        src="/assets/gif/tutorial-paste-link-foto-together.gif"
+                        alt="Tahap 3: tempel link Google Drive pada website Together"
+                        className="h-full w-full object-contain"
+                        loading="lazy"
+                      />
                     </div>
                   </div>
                 </div>
